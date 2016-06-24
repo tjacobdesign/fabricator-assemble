@@ -166,6 +166,21 @@ var getName = function (filePath, preserveNumbers) {
 
 };
 
+/**
+ * Get the name of the parent folder from a path
+ * @param  {String} filePath
+ * @example
+ * './src/materials/structures/foo.html' -> 'structures'
+ * './src/materials/structures/test/02-bar.html' -> 'test'
+ * @return {String}
+ */
+var getFolder = function (filePath, rootFolder) {
+	// get name; replace spaces with dashes
+	var reg = new RegExp('.*' + rootFolder + '\/');
+	var folderName = path.dirname(filePath).replace(reg, '').replace(/-/g, ' ');
+	return folderName.replace(/^[0-9|\.\-]+/, '');
+};
+
 
 /**
  * Attempt to read front matter, handle errors
@@ -387,17 +402,22 @@ var parseDocs = function () {
 	assembly.docs = {};
 
 	// get files
-	var files = globby.sync(options.docs, { nodir: true });
+	var files = globby.sync(options.docs);
 
 	// iterate over each file (material)
 	files.forEach(function (file) {
 
 		var id = getName(file);
+		var folder = getFolder(file, 'docs');
 
 		// save each as unique prop
-		assembly.docs[id] = {
+		if (!assembly.docs[folder]) {
+			assembly.docs[folder] = {};
+		}
+		assembly.docs[folder][id] = {
 			name: toTitleCase(id),
-			content: md.render(fs.readFileSync(file, 'utf-8'))
+			content: md.render(fs.readFileSync(file, 'utf-8')),
+			folder: folder
 		};
 
 	});
