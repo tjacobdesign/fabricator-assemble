@@ -417,7 +417,7 @@ var parseDocs = function () {
 		assembly.docs[folder][id] = {
 			name: toTitleCase(id),
 			content: md.render(fs.readFileSync(file, 'utf-8')),
-			folder: folder
+			folder: toTitleCase(folder)
 		};
 
 	});
